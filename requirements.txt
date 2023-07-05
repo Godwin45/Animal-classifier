@@ -5,6 +5,7 @@ notebook
 numpy 
 matplotlib
 seaborn 
+scikit-learn
 scikit-image
 python-box==6.0.2
 pyYAML
