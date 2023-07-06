@@ -1,1 +1,6 @@
-key: val
+IMAGE_SIZE: [64, 64, 3] # as per VGG 16 model
+BATCH_SIZE: 16
+EPOCHS: 2
+AUGMENTATION: True
+#CLASSES: 2
+
