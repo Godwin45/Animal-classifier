@@ -11,51 +11,46 @@ class Training:
  
     def train_valid_generator(self):
 
-        train_datagen_kwargs = dict(rescale = 1./255,
+        datagenerator_kwargs = dict(rescale = 1./255,
                                    shear_range = 0.2,
                                    zoom_range = 0.2,
+                                   validation_split=0.20,
                                    horizontal_flip = True
         )
 
-        training_set_kwargs = dict(
-                            
-                                target_size = (64, 64),
+        dataflow_kwargs = dict(
+                                target_size = self.config.params_image_size[:-1],
                                 batch_size=self.config.params_batch_size,
                                 class_mode = 'binary'
         )
-        test_datagen_kwargs = dict(rescale = 1./255)
+        
 
-        test_set_kwargs = dict(
-                            target_size = (64, 64),
-                            batch_size=self.config.params_batch_size,
-                            class_mode = 'binary')
-
-
-        test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-            **test_datagen_kwargs
+        valid_datagenerator = tf.keras.preprocessing.image.ImageDataGenerator(
+            **datagenerator_kwargs
         )
 
-        self.test_set = test_datagen.flow_from_directory(
+        self.valid_generator = valid_datagenerator.flow_from_directory(
             directory=self.config.training_data,
             subset="validation",
             shuffle=False,
-            **test_set_kwargs
+            **dataflow_kwargs
         )
         
 
 
         if self.config.params_is_augmentation:
-            train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-                **train_datagen_kwargs
+            train_datagenerator = tf.keras.preprocessing.image.ImageDataGenerator(
+            
+                **datagenerator_kwargs
             )
         else:
-            train_datagen = test_datagen
+             train_datagenerator = valid_datagenerator
 
-        self.training_set = train_datagen.flow_from_directory(
+        self.train_generator = train_datagenerator.flow_from_directory(
             directory=self.config.training_data,
             subset="training",
             shuffle=True,
-            **training_set_kwargs
+            **dataflow_kwargs
         )
 
     @staticmethod
@@ -76,12 +71,21 @@ class Training:
         self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
         
-        self.model.fit(x=self.training_set, validation_data=self.test_set, epochs=self.config.params_epochs)
+        #self.model.fit(x=self.training_set, validation_data=self.test_set, epochs=self.config.params_epochs)
+        self.model.fit(
+            self.train_generator,
+            epochs=self.config.params_epochs,
+            validation_data=self.valid_generator,
+        )
 
         self.save_model(
                     path=self.config.trained_model_path,
                     model=self.model
                     )
+
+    
+
+
 
     
 
