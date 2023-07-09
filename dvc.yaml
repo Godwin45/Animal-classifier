@@ -1,0 +1,40 @@
+stages:
+  data_ingestion:
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      - config/config.yaml
+    outs:
+      - artifacts/data_ingestion/catsndogs  
+
+
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_02_training.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_02_training.py
+      - config/config.yaml
+      - artifacts/data_ingestion/catsndogs
+    params:
+      - IMAGE_SIZE
+      - EPOCHS
+      - BATCH_SIZE
+      - AUGMENTATION
+    outs:
+      - artifacts/training/model.h5
+
+
+  
+
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_03_evaluation.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_03_evaluation.py
+      - config/config.yaml
+      - artifacts/data_ingestion/catsndogs
+      - artifacts/training/model.h5
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    metrics:
+    - scores.json:
+        cache: false

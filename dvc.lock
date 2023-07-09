@@ -1,0 +1,81 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 10078487f5dd945e4647668edd73f60e
+      size: 357
+    - path: src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      hash: md5
+      md5: 46dd229dbdb7670dac25421e534fe5d1
+      size: 914
+    outs:
+    - path: artifacts/data_ingestion/catsndogs
+      hash: md5
+      md5: aae71911c6308b295d6cf5dc7b554ab6.dir
+      size: 24988392
+      nfiles: 1091
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_02_training.py
+    deps:
+    - path: artifacts/data_ingestion/catsndogs
+      hash: md5
+      md5: aae71911c6308b295d6cf5dc7b554ab6.dir
+      size: 24988392
+      nfiles: 1091
+    - path: config/config.yaml
+      hash: md5
+      md5: 10078487f5dd945e4647668edd73f60e
+      size: 357
+    - path: src/cnnClassifier/pipeline/stage_02_training.py
+      hash: md5
+      md5: e2287582edbc45f2f0b602517ba031dc
+      size: 896
+    params:
+      params.yaml:
+        AUGMENTATION: true
+        BATCH_SIZE: 16
+        EPOCHS: 2
+        IMAGE_SIZE:
+        - 64
+        - 64
+        - 3
+    outs:
+    - path: artifacts/training/model.h5
+      hash: md5
+      md5: 557cc317c50edee96729987cd39d3430
+      size: 9801856
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_03_evaluation.py
+    deps:
+    - path: artifacts/data_ingestion/catsndogs
+      hash: md5
+      md5: aae71911c6308b295d6cf5dc7b554ab6.dir
+      size: 24988392
+      nfiles: 1091
+    - path: artifacts/training/model.h5
+      hash: md5
+      md5: 557cc317c50edee96729987cd39d3430
+      size: 9801856
+    - path: config/config.yaml
+      hash: md5
+      md5: 10078487f5dd945e4647668edd73f60e
+      size: 357
+    - path: src/cnnClassifier/pipeline/stage_03_evaluation.py
+      hash: md5
+      md5: 18d8a46a52eb6a0e625b1890cfa263c5
+      size: 883
+    params:
+      params.yaml:
+        BATCH_SIZE: 16
+        IMAGE_SIZE:
+        - 64
+        - 64
+        - 3
+    outs:
+    - path: scores.json
+      hash: md5
+      md5: 6f70599e159b300f931f822553217e7b
+      size: 73
